@@ -1,0 +1,52 @@
+{
+  "name": "@fimbul-works/flatten",
+  "description": "A utility for collecting project files and flattening them into a single directory",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "private": false,
+  "license": "MIT",
+  "author": "FimbulWorks <contact@fimbul.works>",
+  "homepage": "https://github.com/fimbul-works/flatten#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fimbul-works/flatten.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fimbul-works/flatten/issues"
+  },
+  "keywords": [
+    "flatten",
+    "files",
+    "ai",
+    "assistant",
+    "glob",
+    "utility",
+    "cli-tool",
+    "file-collection",
+    "development-tools"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist", "README.md", "LICENSE"],
+  "bin": {
+    "flatten": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc --build --clean && tsc",
+    "format": "npx @biomejs/biome format --write src",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.0",
+    "@types/node": "^24.3.0",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "glob": "^11.0.3",
+    "minimatch": "^10.0.3"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "os": ["darwin", "linux", "win32"]
+}

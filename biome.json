@@ -1,0 +1,16 @@
+{
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 120,
+    "lineEnding": "lf"
+  },
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "noFallthroughSwitchClause": "off"
+      },
+      "style": {}
+    }
+  }
+}
