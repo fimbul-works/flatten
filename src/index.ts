@@ -34,6 +34,7 @@
  */
 
 import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { basename, join, sep as pathSeparator, resolve } from "node:path";
 import { globSync } from "glob";
 import { minimatch } from "minimatch";
 
@@ -43,10 +44,10 @@ import { minimatch } from "minimatch";
 const FLATTEN_FILE = ".flatten";
 
 /** Full path to the configuration file */
-const FLATTEN_FILE_PATH = `./${FLATTEN_FILE}`;
+const FLATTEN_FILE_PATH = resolve(FLATTEN_FILE);
 
 /** Default target directory name (current project folder + "-flatten-flattened" suffix) */
-const DEFAULT_TARGET_PATH = `../${process.cwd().split("/").pop()}-flatten-flattened/`;
+const DEFAULT_TARGET_PATH = join("..", `${basename(process.cwd())}-flatten-flattened`);
 
 /** Maximum file size warning threshold (10MB) */
 const LARGE_FILE_WARNING_SIZE = 10 * 1024 * 1024;
@@ -79,7 +80,7 @@ let totalBytes = 0;
  * Display usage information and help text
  */
 function printHelp(print = console.log): void {
-  print("Flatten Utility - Project File Collection Tool v1.0.0");
+  print("Flatten Utility - Project File Collection Tool v1.0.1");
   print("Usage: npx flatten [OPTIONS] [TARGET_PATH]");
   print("");
   print("OPTIONS:");
@@ -134,7 +135,8 @@ src/**/*.tsx
 
 # Configuration files
 tsconfig.json
-*.config.{js|ts}
+*.config.js
+*.config.ts
 
 # Exclusion rules (files to ignore)
 !**/*.d.ts
@@ -190,7 +192,7 @@ function formatBytes(bytes: number): string {
  * Load and parse .gitignore patterns
  */
 function loadGitignorePatterns(): string[] {
-  const gitignorePath = "./.gitignore";
+  const gitignorePath = resolve(".gitignore");
   if (!existsSync(gitignorePath)) {
     return [];
   }
@@ -277,7 +279,7 @@ for (let i = 0; i < args.length; i++) {
   } else {
     // First non-flag argument is treated as the target path
     if (targetPath === DEFAULT_TARGET_PATH) {
-      targetPath = arg.endsWith("/") ? arg : `${arg}/`; // Ensure trailing slash
+      targetPath = arg.endsWith(pathSeparator) ? arg : `${arg}${pathSeparator}`; // Ensure trailing slash
     } else {
       // Additional non-flag arguments are invalid
       unknownArgs.push(arg);
@@ -315,7 +317,7 @@ if (!dryRun) {
 
   // Clean existing files from target directory if requested
   if (cleanFirst) {
-    const filesToRemove = globSync(`${targetPath}*.*`);
+    const filesToRemove = globSync(join(targetPath, "*.*"));
     if (filesToRemove.length > 0) {
       console.log(`Cleaning ${filesToRemove.length} existing files from ${targetPath}...`);
       for (const file of filesToRemove) {
@@ -462,9 +464,6 @@ function runRule(pattern: string, denyRules: string[] = []): number {
         console.warn(`  ⚠ Large file warning: "${sourceFile}" (${formatBytes(fileSize)})`);
       }
 
-      // Detect path separator (handle both Windows and Unix paths)
-      const pathSeparator = sourceFile.includes("\\") && !sourceFile.includes("/") ? "\\" : "/";
-
       // Apply bijective transformation to create flat filename
       const flattenedFileName = sourceFile
         .replaceAll("_", "__") // Step 1: Escape existing underscores
@@ -473,7 +472,7 @@ function runRule(pattern: string, denyRules: string[] = []): number {
         .filter((component) => !["node_modules", "."].includes(component)) // Step 3: Filter unwanted
         .join("_"); // Step 4: Join with underscores
 
-      const targetFilePath = `${targetPath}${flattenedFileName}`;
+      const targetFilePath = join(targetPath, flattenedFileName);
 
       // Check if the file was already copied
       if (copiedFiles.includes(targetFilePath)) {
